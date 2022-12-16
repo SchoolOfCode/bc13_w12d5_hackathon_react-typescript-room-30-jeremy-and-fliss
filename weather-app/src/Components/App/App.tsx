@@ -8,7 +8,7 @@ function App() {
   const weatherKey = process.env.REACT_APP_API_KEY;
   
   const [userInput, setUserInput] = useState("");
-  const [weather, setWeather] = useState({});
+  const [weather, setWeather] = useState<{name: string, coord: {lat: number, lon: number}, main: {temp: number}, weather: any} | null >();
   
   
  
@@ -20,13 +20,15 @@ function App() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault()
   try{
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${userInput}&appid=${weatherKey}`)
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${userInput}&appid=${weatherKey}&units=metric`)
     const data = await res.json()
+    console.log(data)
     setWeather(data)
+    
   } catch(err) {
     console.log(err)
   }
-   
+  console.log(weather) 
   console.log(userInput)
 
   }
@@ -38,9 +40,10 @@ function App() {
       getUserInput={getUserInput}
       handleSubmit={handleSubmit}
       />
-      <WeatherDisplay 
-      weather={weather}   
-      />
+      {weather && (<WeatherDisplay 
+      weatherInfo={weather}   
+      />)
+    }
   </div>
   );
 }
