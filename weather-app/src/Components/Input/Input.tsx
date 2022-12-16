@@ -19,7 +19,7 @@ export default function CitySearch({userInput, getUserInput, handleSubmit}: City
             value={userInput}
             type="text"
             onChange={(e)=>{getUserInput(e.target.value)}}
-            placeholder="Enter your city name here"
+            placeholder="Enter the city name here"
         />
         <button type="submit">Search</button>
       
