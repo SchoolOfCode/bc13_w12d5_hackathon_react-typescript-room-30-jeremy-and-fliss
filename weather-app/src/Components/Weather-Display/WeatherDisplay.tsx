@@ -19,7 +19,7 @@ const temp = main.temp
         <div>
             <h1>Weather Forecast</h1>
             <p>Location: {name}</p>
-            <p>Gener condition: {skyCondition}</p>
+            <p>General condition: {skyCondition}</p>
             <p>Temperature: {temp} °C</p>
 
         </div>
