@@ -1,65 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
-import CitySearch from '../Input/Input';
-import WeatherDisplay from '../Weather-Display/WeatherDisplay';
 
+import CitySearch from '../CitySearch/CitySearch';
+import WeatherDisplay from '../Weather-Display/WeatherDisplay';
+import { PollutionState, WeatherState } from "../../types"
+
+import './App.css';
+
+const WEATHER_KEY = process.env.REACT_APP_API_KEY;
 
 function App() {
-  const weatherKey = process.env.REACT_APP_API_KEY;
-  
-  const [userInput, setUserInput] = useState("");
-  const [weather, setWeather] = useState<{name: string, coord: {lat: number, lon: number}, main: {temp: number}, weather: any} | null >();
-  const [pollution, setPollution] = useState('')
-
+  const [weather, setWeather] = useState<WeatherState | null>(null);
+  const [pollution, setPollution] = useState<PollutionState | null>(null)
 
   useEffect(() => {
-  
-    const lat = weather?.coord.lat
-    const lon = weather?.coord.lon
-    async function getPollutionData() {
-      const res = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${weatherKey}`)
+    async function getPollutionData(lat: string, lon: string) {
+      const res = await fetch(`http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${WEATHER_KEY}`)
       const data = await res.json()
      
       setPollution(data)
-    }     
-    
-    getPollutionData()
-    console.log("polllution data", pollution)
-  }, [weather, weatherKey])
+    }
+
+    if(weather) {
+      const lat = weather.coord.lat.toString()
+      const lon = weather.coord.lon.toString()
+      getPollutionData(lat, lon); 
+    }
+  }, [weather])
  
-  
-  function getUserInput(data: string){
-    setUserInput(data)
-  }
-  
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault()
+ 
+
+  async function fetchWeather(cityName: string) {
   try{
-    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${userInput}&appid=${weatherKey}&units=metric`)
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${WEATHER_KEY}&units=metric`)
+   
     const data = await res.json()
+    if(data.cod !== "404") {
+      setWeather(data)
+    }
+     
+      
+  } catch(error) {
+    console.log(error)
     
-    setWeather(data)
-    
-  } catch(err) {
-    console.log(err)
   }
   console.log(weather) 
-  console.log(userInput)
-    
   }
 
   return (
    <div className="container">
       <h1>Weather App</h1>
-      <CitySearch 
-      userInput={userInput} 
-      getUserInput={getUserInput}
-      handleSubmit={handleSubmit}
-      />
-      {weather && (<WeatherDisplay 
-      weatherInfo={weather}   
-      />)
-    }
+      <CitySearch fetchWeather={fetchWeather}/>
+      {weather !== null && (<WeatherDisplay weatherInfo={weather} pollution={pollution} />)}
+      
   </div>
   );
 }
